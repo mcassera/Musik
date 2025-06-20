@@ -83,34 +83,15 @@ SC:
 
 		jsr clrScreen
 
+		
+
 ;Set up TinyVicky to display tiles
 		lda #%00000000						;no tiles for layer 0 and 1	               |xx|LA YE R1|xx|LA YE R0|
 		sta VKY_LAYER_CTRL_0				;						 				   | 0| 0| 0| 0| 0| 0| 0| 0|
 		lda #%00000100						;Layer 2 = TileMap 2					   |xx|xx|xx|xx|xx|LA YE R2|	
 		sta VKY_LAYER_CTRL_1				;										   | 0| 0| 0| 0| 0| 1| 0| 0|
 
-;Set TileSet 0 for our background
-		lda #<tileset
-		sta VKY_TS0_AD_L
-		lda #>tileset
-		sta VKY_TS0_AD_M
-		lda #$01							
-		sta VKY_TS0_AD_H
-
-;Set Tile Map 0
-		lda #%00000001						; 16 x 16 tiles, enable					   |xx|xx|xx|TS|xx|xx|xx|EN|
-		sta VKY_TM0_CTRL					;										   | 0| 0| 0| 0| 0| 0| 0| 1|
-		lda #20								; Tile Map Size 20 X 
-		sta VKY_TM0_SZ_X
-		lda #15								; Tile Map Size 15 Y
-		sta VKY_TM0_SZ_Y
-
-		lda #<tilemap				; Point to the Tile Map Data, LOW BYTE
-		sta VKY_TM0_AD_L
-		lda #>tilemap				; Point to the Tile Map Data, MEDIUM BYTE
-		sta VKY_TM0_AD_M
-		lda #$01							; Point to the Tile Map Data, HIGH BYTE
-		sta VKY_TM0_AD_H
+		jsr setTileMap1
 
 ; ************************************************************************************************************************************
 
@@ -216,9 +197,9 @@ skipSet:
 		ldx #$00
 eTextLoop:
 		lda exitText,x 
-		sta $c497,x 
+		sta $c488,x 
 		inx
-		cpx #$0a
+		cpx #40
 		bcc eTextLoop
 
 loop:
@@ -247,8 +228,10 @@ dispatch:
 keypress:
 		lda event.key.flags               	; Once a key is pressed, we can get the ascii value by loading the byte from the
         lda event.key.ascii                 ; event.key.ascii location assigned by the kernel. We then check to see if it's a
-		cmp #135							; space bar
+		cmp #135							; f7
 		beq endprog
+		cmp #129							; f1
+		beq changeDisplay
 		rts
 endprog:
 		lda #%00000001						; Graphic, Sprites Engine enabled  			|xx|GM|SP|TL|BM|GR|OV|TX|
@@ -258,6 +241,24 @@ endprog:
 		sta VKY_MSTR_CTRL_1					; 320 x 240, 60 Hz, dbl X & Y				| 0| 0| 0| 0| 0| 1| 1| 0|
 		stz VKY_BRDR_CTRL					; No Border
 		jmp $e020							; reset f256
+
+changeDisplay:
+		lda disp
+		beq lines
+		cmp #$01
+		beq diags
+squares:	
+		stz disp
+		jmp setTileMap1
+		
+lines:
+		inc disp
+		jmp setTileMap2
+
+diags:
+		inc disp
+		jmp setTileMap3
+		
 
 UpdateScreen:
 		jsr SetTimer						; set timer for next TOF
@@ -436,7 +437,82 @@ colorDone:
 		rts
 
 ; ************************************************************************************************************************************
+setTileMap1:
+;Set TileSet 0 for our background
+		lda #<tileset1
+		sta VKY_TS0_AD_L
+		lda #>tileset1
+		sta VKY_TS0_AD_M
+		lda #$01							
+		sta VKY_TS0_AD_H
 
+;Set Tile Map 0
+		lda #%00000001						; 16 x 16 tiles, enable					   |xx|xx|xx|TS|xx|xx|xx|EN|
+		sta VKY_TM0_CTRL					;										   | 0| 0| 0| 0| 0| 0| 0| 1|
+		lda #20								; Tile Map Size 20 X 
+		sta VKY_TM0_SZ_X
+		lda #15								; Tile Map Size 15 Y
+		sta VKY_TM0_SZ_Y
+
+		lda #<tilemap1						; Point to the Tile Map Data, LOW BYTE
+		sta VKY_TM0_AD_L
+		lda #>tilemap1						; Point to the Tile Map Data, MEDIUM BYTE
+		sta VKY_TM0_AD_M
+		lda #$01							; Point to the Tile Map Data, HIGH BYTE
+		sta VKY_TM0_AD_H
+		rts
+; ************************************************************************************************************************************
+setTileMap2:
+;Set TileSet 0 for our background
+		lda #<tileset2
+		sta VKY_TS0_AD_L
+		lda #>tileset2
+		sta VKY_TS0_AD_M
+		lda #$02						
+		sta VKY_TS0_AD_H
+
+;Set Tile Map 0
+		lda #%00000001						; 16 x 16 tiles, enable					   |xx|xx|xx|TS|xx|xx|xx|EN|
+		sta VKY_TM0_CTRL					;										   | 0| 0| 0| 0| 0| 0| 0| 1|
+		lda #20								; Tile Map Size 20 X 
+		sta VKY_TM0_SZ_X
+		lda #15								; Tile Map Size 15 Y
+		sta VKY_TM0_SZ_Y
+
+		lda #<tilemap2						; Point to the Tile Map Data, LOW BYTE
+		sta VKY_TM0_AD_L
+		lda #>tilemap2						; Point to the Tile Map Data, MEDIUM BYTE
+		sta VKY_TM0_AD_M
+		lda #$02							; Point to the Tile Map Data, HIGH BYTE
+		sta VKY_TM0_AD_H
+		rts
+; ************************************************************************************************************************************
+
+setTileMap3:
+;Set TileSet 0 for our background
+		lda #<tileset3
+		sta VKY_TS0_AD_L
+		lda #>tileset3
+		sta VKY_TS0_AD_M
+		lda #$03						
+		sta VKY_TS0_AD_H
+
+;Set Tile Map 0
+		lda #%00000001						; 16 x 16 tiles, enable					   |xx|xx|xx|TS|xx|xx|xx|EN|
+		sta VKY_TM0_CTRL					;										   | 0| 0| 0| 0| 0| 0| 0| 1|
+		lda #20								; Tile Map Size 20 X 
+		sta VKY_TM0_SZ_X
+		lda #15								; Tile Map Size 15 Y
+		sta VKY_TM0_SZ_Y
+
+		lda #<tilemap3						; Point to the Tile Map Data, LOW BYTE
+		sta VKY_TM0_AD_L
+		lda #>tilemap3						; Point to the Tile Map Data, MEDIUM BYTE
+		sta VKY_TM0_AD_M
+		lda #$03							; Point to the Tile Map Data, HIGH BYTE
+		sta VKY_TM0_AD_H
+		rts
+; ************************************************************************************************************************************
 
 ; set midi device
 setMidiInstrument:
@@ -492,7 +568,9 @@ totalColors:    .byte $00
 midiInst:		.byte 6
 playSong:		.byte $10
 bc:				.byte $00
-exitText:		.text "F7 to Quit"
+disp:			.byte $00
+;					  "0123456789012345678901234567890123456789"	
+exitText:		.text "     F1 - Display      F7 - Quit        "
 				.byte $00,$00,$00,$00,$00,$00
 boxR:			.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 				.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -519,7 +597,19 @@ CLUT0:
 .include "clut.s"
 
 *=$10000
-tileset:
+tileset1:
 .include "Musik_tileset.s"
-tilemap:
+tilemap1:
 .binary "Musik_tilemap.tlm"
+
+*=$20000
+tileset2:
+.include "Musik2_tileset.s"
+tilemap2:
+.binary "Musik2_tilemap.tlm"
+
+*=$30000
+tileset3:
+.include "Musik3_tileset.s"
+tilemap3:
+.binary "Musik3_tilemap.tlm"
